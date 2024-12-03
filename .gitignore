@@ -45,6 +45,11 @@ sources_pdf/**
 sources_png/**
 sources_markdown/**
 
+# Markdown files in root (except template and README)
+/*.md
+!README.md
+!template_draft.md
+
 # Document types
 *.doc
 *.docx
