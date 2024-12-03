@@ -73,8 +73,9 @@ def pdf_to_markdown(pdf_path, output_dir):
                 text = page.extract_text()
                 if text:
                     cleaned_text = clean_text(text)
-                    # Add page number header
-                    content += f"### Page {page_num + 1} of {total_pages}\n\n"
+                    # Add page number header with reference to PNG
+                    content += f"### Page {page_num + 1} of {total_pages}\n"
+                    content += f"*[View page image](../sources_png/{pdf_name}/page_{page_num + 1:03d}.png)*\n\n"
                     content += f"{cleaned_text}\n\n"
                     # Add a horizontal rule between pages
                     if page_num < total_pages - 1:
@@ -94,8 +95,8 @@ def main():
     """Main function to process all PDFs in the source directory."""
     # Get the project root directory
     project_root = Path(__file__).parent.parent
-    pdf_dir = project_root / "pdf_sources"
-    output_dir = project_root / "markdown_sources"
+    pdf_dir = project_root / "sources_pdf"
+    output_dir = project_root / "sources_markdown"
     
     try:
         # Create output directory if it doesn't exist

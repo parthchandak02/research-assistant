@@ -64,8 +64,8 @@ def main():
     """Main function to process all PDFs in the source directory."""
     # Get the project root directory
     project_root = Path(__file__).parent.parent
-    source_dir = project_root / "pdf_sources"
-    output_dir = project_root / "image_sources"
+    source_dir = project_root / "sources_pdf"
+    output_dir = project_root / "sources_png"
     
     try:
         # Setup output directory

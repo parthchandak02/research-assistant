@@ -41,8 +41,19 @@ ehthumbs.db
 Thumbs.db
 
 # Project specific
-pdf_sources/*.pdf
-image_sources/*.png
-image_sources/*.jpg
-image_sources/*.jpeg
+sources_pdf/*.pdf
+sources_png/*.png
+sources_png/*.jpg
+sources_png/*.jpeg
+sources_markdown/*.md
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.csv
+*.mp4
+*.avi
+*.mov
+*.mp3
+*.wav
 *.log
