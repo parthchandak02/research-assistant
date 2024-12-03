@@ -5,7 +5,6 @@ import logging
 from pathlib import Path
 import fitz  # PyMuPDF
 from tqdm import tqdm
-import shutil
 
 # Configure logging
 logging.basicConfig(
@@ -63,8 +62,10 @@ def convert_pdf_to_png(pdf_path: str, output_dir: str) -> None:
 
 def main():
     """Main function to process all PDFs in the source directory."""
-    source_dir = "/Users/parthchandak/Research/ebikes_research/sources"
-    output_dir = "/Users/parthchandak/Research/ebikes_research/paper_images"
+    # Get the project root directory
+    project_root = Path(__file__).parent.parent
+    source_dir = project_root / "pdf_sources"
+    output_dir = project_root / "image_sources"
     
     try:
         # Setup output directory

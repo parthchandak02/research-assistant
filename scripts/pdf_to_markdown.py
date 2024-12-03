@@ -1,9 +1,22 @@
 #!/usr/bin/env python3
+
 import os
 import sys
 from pathlib import Path
 import pypdf
 import re
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('pdf_to_markdown_conversion.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
 def clean_text(text):
     """Clean extracted text to make it more readable."""
@@ -43,6 +56,8 @@ def pdf_to_markdown(pdf_path, output_dir):
         pdf_name = Path(pdf_path).stem
         output_path = output_dir / f"{pdf_name}.md"
         
+        logger.info(f"Converting {pdf_path} to markdown")
+        
         # Open PDF file
         with open(pdf_path, 'rb') as file:
             pdf_reader = pypdf.PdfReader(file)
@@ -69,29 +84,45 @@ def pdf_to_markdown(pdf_path, output_dir):
             with open(output_path, 'w', encoding='utf-8') as md_file:
                 md_file.write(content)
             
-            print(f"Successfully converted {pdf_path.name} ({total_pages} pages)")
+            logger.info(f"Successfully converted {pdf_path.name} ({total_pages} pages)")
             return output_path
     except Exception as e:
-        print(f"Error processing {pdf_path}: {str(e)}")
+        logger.error(f"Error processing {pdf_path}: {str(e)}")
         return None
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python pdf_to_markdown.py <pdf_directory>")
-        sys.exit(1)
+    """Main function to process all PDFs in the source directory."""
+    # Get the project root directory
+    project_root = Path(__file__).parent.parent
+    pdf_dir = project_root / "pdf_sources"
+    output_dir = project_root / "markdown_sources"
     
-    pdf_dir = sys.argv[1]
-    output_dir = os.path.join(os.path.dirname(pdf_dir), "markdown_sources")
-    
-    # Process all PDFs in the directory
-    pdf_files = Path(pdf_dir).glob('*.pdf')
-    for pdf_path in pdf_files:
-        print(f"Converting {pdf_path.name}...")
-        output_path = pdf_to_markdown(pdf_path, output_dir)
-        if output_path:
-            print(f"Created {output_path}")
-        else:
-            print(f"Failed to convert {pdf_path.name}")
+    try:
+        # Create output directory if it doesn't exist
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Process all PDFs in the directory
+        pdf_files = list(pdf_dir.glob('*.pdf'))
+        
+        if not pdf_files:
+            logger.warning("No PDF files found in source directory")
+            return
+        
+        logger.info(f"Found {len(pdf_files)} PDF files to process")
+        
+        # Process each PDF
+        for pdf_path in pdf_files:
+            output_path = pdf_to_markdown(pdf_path, output_dir)
+            if output_path:
+                logger.info(f"Created {output_path}")
+            else:
+                logger.error(f"Failed to convert {pdf_path.name}")
+        
+        logger.info("All PDF conversions completed successfully")
+        
+    except Exception as e:
+        logger.error(f"An error occurred during processing: {e}")
+        raise
 
 if __name__ == "__main__":
     main()
