@@ -40,12 +40,12 @@ ENV/
 ehthumbs.db
 Thumbs.db
 
-# Project specific
-sources_pdf/*.pdf
-sources_png/*.png
-sources_png/*.jpg
-sources_png/*.jpeg
-sources_markdown/*.md
+# Project specific - ignore entire directories
+sources_pdf/**
+sources_png/**
+sources_markdown/**
+
+# Document types
 *.doc
 *.docx
 *.xls
