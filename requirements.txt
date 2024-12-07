@@ -1,3 +1,9 @@
-pypdf==3.17.1
-PyMuPDF==1.23.7
-tqdm==4.66.1
+asyncpg
+openai
+pydantic-ai
+logfire
+PyMuPDF
+pypdf
+tqdm
+python-dotenv
+tiktoken
