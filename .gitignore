@@ -1,3 +1,17 @@
+# Python virtual environments
+venv/
+*-venv/
+.env
+.venv
+env/
+ENV/
+
+# Database
+postgres-data/
+*.db
+*.sqlite
+*.sqlite3
+
 # Python
 __pycache__/
 *.py[cod]
@@ -20,16 +34,25 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual Environment
-venv/
-env/
-ENV/
-
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
+.DS_Store
+
+# Logs
+*.log
+*.log.*
+logs/
+log/
+
+# Environment variables
+.env
+.env.*
+
+# OpenAI API key file (if you have one)
+openai.key
 
 # OS
 .DS_Store
@@ -49,6 +72,7 @@ sources_markdown/**
 /*.md
 !README.md
 !template_draft.md
+!template_humainze.md
 
 # Document types
 *.doc
@@ -61,4 +85,3 @@ sources_markdown/**
 *.mov
 *.mp3
 *.wav
-*.log

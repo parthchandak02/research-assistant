@@ -1,33 +1,37 @@
 # Research Assistant
 
-A tool for managing academic research materials, including PDF processing, markdown conversion, and image extraction.
+A tool for managing academic research materials, including PDF processing, knowledge ingestion, and semantic search capabilities using AI agents.
 
 ## Project Structure
 
 ```
 research-assistant/
+├── agents/             # AI agents for processing and querying
+│   ├── document_processor.py  # Handles PDF conversion
+│   ├── knowledge_ingester.py  # Manages vector database ingestion
+│   └── query_agent.py        # Handles semantic search queries
+├── scripts/           # Utility scripts
+│   ├── pdf_to_markdown.py
+│   └── pdf_to_png.py
 ├── sources_pdf/       # Store original PDF papers
 ├── sources_markdown/  # Converted markdown versions of papers
-├── sources_png/       # Extracted images from PDFs
-├── scripts/          # Python scripts for conversion
-└── draft.md          # Main literature review draft
+└── sources_png/       # Extracted images from PDFs
 ```
 
 ## Features
 
-- PDF to Markdown conversion with page tracking
+- PDF to Markdown conversion with OpenAI-enhanced processing
 - Image extraction from PDFs (300 DPI)
+- Vector database storage for semantic search
+- RAG (Retrieval-Augmented Generation) based querying
 - Organized storage of research materials
-- Literature review management
-- Cross-referenced markdown and PNG files
 
 ## Requirements
 
 - Python 3.8+
-- Required Python packages (install via `pip install -r requirements.txt`):
-  - pypdf==3.17.1
-  - PyMuPDF==1.23.7
-  - tqdm==4.66.1
+- PostgreSQL with pgvector extension
+- OpenAI API key
+- Required Python packages (install via `pip install -r requirements.txt`)
 
 ## Setup
 
@@ -37,54 +41,83 @@ git clone https://github.com/parthchandak02/research-assistant.git
 cd research-assistant
 ```
 
-2. Install required packages:
+2. Create and activate a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. Install required packages:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Place your PDF files in the `sources_pdf` directory
+4. Set up PostgreSQL with pgvector:
+```bash
+docker run --name postgres-vector \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=knowledge_base \
+  -p 5432:5432 \
+  -d pgvector/pgvector:pg16
+```
+
+5. Create a `.env` file with your OpenAI API key:
+```bash
+OPENAI_API_KEY=your_api_key_here
+```
 
 ## Usage
 
-### Converting PDFs to Markdown and Images
-
-1. Place your PDF files in the `sources_pdf` directory
-
-2. Run the PNG extraction script:
+1. Process PDF documents:
 ```bash
-python scripts/pdf_to_png.py
+python agents/document_processor.py --input-dir sources_pdf
 ```
-This will:
-- Create PNG images for each page of each PDF
-- Save them in `sources_png/<pdf_name>/page_XXX.png`
-- Use 300 DPI for high-quality images
 
-3. Run the Markdown conversion script:
+2. Ingest knowledge into vector database:
 ```bash
-python scripts/pdf_to_markdown.py
+python agents/knowledge_ingester.py
 ```
-This will:
-- Convert each PDF to a markdown file
-- Include metadata (title, authors, etc.)
-- Add page numbers and links to corresponding PNG files
-- Save in `sources_markdown/<pdf_name>.md`
 
-### Working with the Generated Files
+3. Query your research materials:
+```bash
+python agents/query_agent.py "Your research question here"
+```
 
-- Each markdown file will contain links to its corresponding PNG files
-- Page numbers in markdown files match the PNG file names
-- Example link in markdown: `[View page image](../sources_png/paper_name/page_001.png)`
+You can also use the agents programmatically in your Python code:
 
-### Literature Review
+```python
+from agents.document_processor import DocumentProcessor
+from agents.knowledge_ingester import KnowledgeIngester
+from agents.query_agent import QueryAgent
 
-- Use `draft.md` for your main literature review
-- Reference the converted markdown files and images as needed
-- Keep track of sources in the bibliography section
+# Initialize and use the agents as needed
+```
+
+## Agent Descriptions
+
+### Document Processor
+- Converts PDFs to markdown format
+- Extracts images from PDFs
+- Uses OpenAI for enhanced text processing (optional)
+
+### Knowledge Ingester
+- Processes markdown files into embeddings
+- Stores content in vector database
+- Handles large documents by chunking
+
+### Query Agent
+- Performs semantic search on stored knowledge
+- Uses RAG for intelligent responses
+- Provides source references for answers
 
 ## Contributing
 
-Feel free to submit issues and enhancement requests!
+Feel free to:
+- Submit issues for suggestions
+- Create pull requests with improvements
+- Share your customized versions
+- Report any bugs or unclear documentation
 
 ## License
 
-MIT License - See LICENSE file for details
+This project is licensed under MIT License - see the LICENSE file for details.
