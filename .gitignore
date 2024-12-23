@@ -63,10 +63,13 @@ openai.key
 ehthumbs.db
 Thumbs.db
 
-# Project specific - ignore entire directories
-sources_pdf/**
-sources_png/**
-sources_markdown/**
+# Project specific - ignore contents but keep structure
+sources_pdf/*
+!sources_pdf/.gitkeep
+sources_png/*
+!sources_png/.gitkeep
+sources_markdown/*
+!sources_markdown/.gitkeep
 
 # Markdown files in root (except template and README)
 /*.md
