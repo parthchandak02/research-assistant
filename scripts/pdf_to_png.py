@@ -1,95 +1,90 @@
 #!/usr/bin/env python3
 
-import os
-import logging
-from pathlib import Path
 import fitz  # PyMuPDF
-from tqdm import tqdm
+from pathlib import Path
+import logging
+from typing import Optional, Union
+from dataclasses import dataclass
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('pdf_to_png_conversion.log'),
-        logging.StreamHandler()
-    ]
+    format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-def setup_output_directory(output_base_dir: str) -> None:
-    """Create output directory if it doesn't exist."""
-    try:
-        os.makedirs(output_base_dir, exist_ok=True)
-        logger.info(f"Output directory setup complete: {output_base_dir}")
-    except Exception as e:
-        logger.error(f"Failed to create output directory: {e}")
-        raise
+@dataclass
+class ConversionResult:
+    """Result of a PDF to PNG conversion."""
+    page_count: int
+    source_path: Path
+    output_directory: Path
 
-def get_safe_filename(filename: str) -> str:
-    """Convert filename to a safe version by removing problematic characters."""
-    return "".join(c for c in filename if c.isalnum() or c in (' ', '-', '_')).rstrip()
+class PDFToPNG:
+    """Convert PDF files to PNG images."""
 
-def convert_pdf_to_png(pdf_path: str, output_dir: str) -> None:
-    """Convert a single PDF file to PNG images."""
-    try:
-        # Create subfolder for this PDF's images
-        pdf_name = get_safe_filename(Path(pdf_path).stem)
-        pdf_output_dir = os.path.join(output_dir, pdf_name)
-        os.makedirs(pdf_output_dir, exist_ok=True)
-        
-        # Open PDF
-        doc = fitz.open(pdf_path)
-        logger.info(f"Processing PDF: {pdf_path} ({len(doc)} pages)")
-        
-        # Convert each page with progress bar
-        for page_num in tqdm(range(len(doc)), desc=f"Converting {pdf_name}", unit="page"):
+    def __init__(self):
+        """Initialize the converter."""
+        self.logger = logger
+
+    def convert(self, input_path: Union[str, Path], output_dir: Optional[Union[str, Path]] = None) -> ConversionResult:
+        """
+        Convert a PDF file to PNG images.
+
+        Args:
+            input_path: Path to the PDF file
+            output_dir: Optional path to save PNG files. If not provided, uses sources_png/pdf_name/
+
+        Returns:
+            ConversionResult object containing conversion metadata
+        """
+        input_path = Path(input_path)
+        if not input_path.exists():
+            raise FileNotFoundError(f"PDF file not found: {input_path}")
+
+        # Set up output directory
+        if output_dir is None:
+            output_dir = Path('sources_png') / input_path.stem
+        else:
+            output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        self.logger.info(f"Processing PDF: {input_path.name}")
+
+        # Open the PDF
+        doc = fitz.open(input_path)
+        total_pages = len(doc)
+        self.logger.info(f"Total pages: {total_pages}")
+
+        # Convert each page
+        for page_num in range(total_pages):
             page = doc[page_num]
-            
-            # Get the page's image
             pix = page.get_pixmap(matrix=fitz.Matrix(300/72, 300/72))  # 300 DPI
-            
-            # Save image
-            output_path = os.path.join(pdf_output_dir, f"page_{page_num + 1:03d}.png")
-            pix.save(output_path)
-            
-        logger.info(f"Successfully converted {pdf_path} to PNGs")
-        doc.close()
-        
-    except Exception as e:
-        logger.error(f"Error converting {pdf_path}: {e}")
-        raise
+            output_path = output_dir / f"page_{page_num + 1:03d}.png"
+            pix.save(str(output_path))
+            self.logger.info(f"Saved page {page_num + 1} to {output_path}")
+
+        return ConversionResult(
+            page_count=total_pages,
+            source_path=input_path,
+            output_directory=output_dir
+        )
 
 def main():
-    """Main function to process all PDFs in the source directory."""
-    # Get the project root directory
-    project_root = Path(__file__).parent.parent
-    source_dir = project_root / "sources_pdf"
-    output_dir = project_root / "sources_png"
-    
+    import argparse
+    parser = argparse.ArgumentParser(description='Convert PDF to PNG images')
+    parser.add_argument('input_path', type=str, help='Path to the PDF file')
+    parser.add_argument('-o', '--output', type=str, help='Output directory for PNG files')
+
+    args = parser.parse_args()
+
+    converter = PDFToPNG()
     try:
-        # Setup output directory
-        setup_output_directory(output_dir)
-        
-        # Get list of PDF files
-        pdf_files = [f for f in os.listdir(source_dir) if f.lower().endswith('.pdf')]
-        
-        if not pdf_files:
-            logger.warning("No PDF files found in source directory")
-            return
-        
-        logger.info(f"Found {len(pdf_files)} PDF files to process")
-        
-        # Process each PDF
-        for pdf_file in pdf_files:
-            pdf_path = os.path.join(source_dir, pdf_file)
-            convert_pdf_to_png(pdf_path, output_dir)
-        
-        logger.info("All PDF conversions completed successfully")
-        
+        result = converter.convert(args.input_path, args.output)
+        logger.info(f"Successfully converted {result.page_count} pages to {result.output_directory}")
     except Exception as e:
-        logger.error(f"An error occurred during processing: {e}")
-        raise
+        logger.error(f"Error converting PDF: {e}")
+        exit(1)
 
 if __name__ == "__main__":
     main()
