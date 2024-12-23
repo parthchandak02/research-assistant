@@ -17,11 +17,23 @@ pip install -r requirements.txt
 
 3. Convert PDFs:
 ```bash
-# To Markdown
+# Single file conversion
 python scripts/pdf_to_markdown.py sources_pdf/paper.pdf -o sources_markdown/paper.md
-
-# To PNG images (300 DPI)
 python scripts/pdf_to_png.py sources_pdf/paper.pdf -o sources_png/paper/
+
+# Bulk conversion (Unix/Mac)
+for pdf in sources_pdf/*.pdf; do
+    name=$(basename "$pdf" .pdf)
+    python scripts/pdf_to_markdown.py "$pdf" -o "sources_markdown/$name.md"
+    python scripts/pdf_to_png.py "$pdf" -o "sources_png/$name"
+done
+
+# Bulk conversion (Windows PowerShell)
+Get-ChildItem "sources_pdf/*.pdf" | ForEach-Object {
+    $name = $_.BaseName
+    python scripts/pdf_to_markdown.py $_.FullName -o "sources_markdown/$name.md"
+    python scripts/pdf_to_png.py $_.FullName -o "sources_png/$name"
+}
 ```
 
 ## Project Structure
