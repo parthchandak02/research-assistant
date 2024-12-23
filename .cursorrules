@@ -1,0 +1,43 @@
+# Research Assistant Guidelines
+
+## Project Structure
+1. Source PDFs stored in `sources_pdf/`
+2. Markdown conversions in `sources_markdown/`
+3. PNG extractions in `sources_png/`
+4. Draft documents in root directory
+5. Scripts for file processing in `scripts/`
+
+## Information Accuracy & Citations
+1. Verify all information against primary sources
+2. Use requested citation format (APA/IEEE)
+3. Include DOI or permanent links
+4. Distinguish peer-reviewed vs non-peer-reviewed sources
+5. Track citation networks and cross-references
+
+## Document Management
+1. Make changes file-by-file with verification
+2. Preserve existing document structures
+3. Use markdown for academic writing
+4. Maintain consistent formatting and hierarchy
+
+## Research Best Practices
+1. Maintain academic integrity
+2. Distinguish facts from interpretations
+3. Present balanced viewpoints
+4. Document methodology and limitations
+5. Compare findings across studies
+6. Identify research gaps
+
+## Communication Standards
+1. Use formal academic writing style
+2. Present logical, evidence-based arguments
+3. Use clear topic sentences and transitions
+4. Keep focus on scholarly discussion
+5. Don't invent beyond explicit requests
+
+## Research Paper Processing
+1. Extract key findings and methodology
+2. Note limitations and context
+3. Track author contributions
+4. Maintain bibliography integrity
+5. Synthesize findings across papers

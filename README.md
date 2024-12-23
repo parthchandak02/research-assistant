@@ -57,10 +57,11 @@ research-assistant/
 ## Requirements
 
 - Python 3.8+
-- Required Python packages:
+- Required Python packages (see requirements.txt):
   - PyMuPDF (for PDF processing)
   - tqdm (for progress tracking)
-  - python-dotenv (for environment variables)
+  - pandoc (for document conversion)
+  - python-docx (for Word document handling)
 
 ## Usage Examples
 
