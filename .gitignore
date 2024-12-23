@@ -85,3 +85,4 @@ sources_markdown/**
 *.mov
 *.mp3
 *.wav
+user_illustrations/*.png
