@@ -1,4 +1,6 @@
 # Python virtual environments
+.history
+
 venv/
 *-venv/
 .env
@@ -89,3 +91,7 @@ sources_markdown/*
 *.mp3
 *.wav
 user_illustrations/*.png
+user_vos_diagram/*.png
+user_vos_diagram/*.pdf
+user_vos_diagram/*.ris
+

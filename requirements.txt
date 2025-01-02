@@ -1,15 +1,10 @@
-asyncpg
-openai
-pydantic-ai
-logfire
 PyMuPDF
 pypdf
+beautifulsoup4
 tqdm
 python-dotenv
-tiktoken
 pandas
 numpy
 transformers
 torch
 sentence-transformers
-git+https://github.com/PrithivirajDamodaran/Parrot_Paraphraser.git
