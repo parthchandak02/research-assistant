@@ -8,3 +8,5 @@ numpy
 transformers
 torch
 sentence-transformers
+PyPDF2
+logfire
