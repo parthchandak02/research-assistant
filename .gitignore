@@ -72,6 +72,8 @@ sources_png/*
 !sources_png/.gitkeep
 sources_markdown/*
 !sources_markdown/.gitkeep
+sources_csv/*
+!sources_csv/.gitkeep
 
 # Markdown files in root (except template and README)
 /*.md
