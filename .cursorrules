@@ -122,12 +122,38 @@
 1. Example of consistent heading structure:
    ```markdown
    # Review Title
-   ## Background
-   ### Historical Context
-   ### Current State
+
+   ## Abstract
+
+   ## Introduction
+
+   ## Objectives
+   ### Research Questions
+   ### Study Scope
+
    ## Methods
-   ### Approach
-   ### Implementation
+   ### Inclusion Criteria
+   ### Exclusion Criteria
+   ### Data Collection
+   ### Analysis Framework
+
+   ## Results
+   ### Primary Findings
+   ### Thematic Analysis
+   ### Statistical Overview
+   ### Key Insights
+
+   ## Discussion
+   ### Interpretation of Results
+   ### Limitations
+   ### Future Directions
+
+   ## Conclusion
+   ### Summary of Findings
+   ### Implications
+   ### Recommendations
+
+   ## References
    ```
 
 2. Example of table formatting:
