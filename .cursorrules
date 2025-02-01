@@ -38,33 +38,35 @@
 ## Image and Table Management
 1. Center all images using markdown div syntax and set standard width:
    ```markdown
-   <div style="width: 500px;">
+   <div style="width: 500px; margin: 0 auto; text-align: center;">
 
    ![Description of Image](sources_png/paper_id/page_001.png)
 
    </div>
 
-   *Note: Description of the content. Adapted from Author et al. (YEAR), Fig. X.*
+   *Figure N: Descriptive Title - Illustrates key components or findings. Adapted from Author et al. (YEAR), Fig. X.*
    ```
 2. Use standard image width:
    - All figures and diagrams: 500px
    - Add blank lines before and after the div and image for better readability
 3. Format figure captions:
    - Start with "Figure N:" for numbering in the document
-   - Follow with descriptive title
-   - End with *Note: [Description]. Adapted from [Author] ([Year]), Fig. [X].* where X is the original figure number
-4. Format tables with clear headers and citations:
+   - Include descriptive title after the colon
+   - Add brief explanation after a dash
+   - End with source citation including original figure number
+4. Format tables for Google Docs compatibility:
    ```markdown
-   **Table 1: Descriptive Title**
-   | Column 1 | Column 2 | Column 3 |
-   |----------|----------|----------|
-   | Data     | Data     | Data     |
+   Table N: Descriptive Title
 
-   *Note: Description of the table. Adapted from Author et al. (YEAR), Table X.*
+   Header 1 | Header 2 | Header 3
+   ---------|----------|----------
+   Content 1 | Content 2 | Content 3
+
+   Note: Description of the table. Adapted from Author et al. (YEAR), Table X.
    ```
 5. For tables synthesized from multiple sources:
    ```markdown
-   *Note: Framework synthesized from multiple sources: Author1 et al. (YEAR1), Author2 et al. (YEAR2), Author3 (YEAR3).*
+   Note: Framework synthesized from multiple sources: Author1 et al. (YEAR1), Author2 et al. (YEAR2), Author3 (YEAR3).
    ```
 
 ## Source Integration Workflow
@@ -132,26 +134,16 @@
    ### Study Scope
 
    ## Methods
-   ### Inclusion Criteria
-   ### Exclusion Criteria
-   ### Data Collection
-   ### Analysis Framework
 
    ## Results
-   ### Primary Findings
-   ### Thematic Analysis
-   ### Statistical Overview
-   ### Key Insights
 
    ## Discussion
    ### Interpretation of Results
    ### Limitations
-   ### Future Directions
 
    ## Conclusion
    ### Summary of Findings
-   ### Implications
-   ### Recommendations
+   ### Future Directions
 
    ## References
    ```
