@@ -115,6 +115,12 @@ class ResearchAssistant:
 
         for i, pdf_path in enumerate(pdf_files):
             try:
+                # Check if analysis already exists
+                analysis_exists = any(self.analysis_dir.glob(f"{pdf_path.stem}*_analysis.xml"))
+                if analysis_exists:
+                    logfire.info(f"Skipping {pdf_path.name} - analysis already exists")
+                    continue
+
                 # Add delay between files to avoid rate limiting
                 if i > 0:
                     delay = 15  # 15 seconds delay between files
