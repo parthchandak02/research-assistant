@@ -1,0 +1,327 @@
+# Paper Title
+"Integrating Advanced Sensor Fusion with User-Centered Design and Rapid Prototyping in Robotics: A Comprehensive Review"
+
+# AI Research Assistant Guidelines
+
+This document guides the AI Research Assistant in conducting autonomous systematic literature reviews and research analysis across academic domains, while maintaining self-improvement and metacognitive capabilities.
+
+## Core Research Principles
+1. Maintain academic rigor and systematic review methodology
+2. Ensure reproducible research processes
+3. Follow structured analysis and synthesis protocols
+4. Support collaborative research workflows
+5. Enable autonomous decision-making within defined parameters
+6. Practice continuous learning and self-improvement
+
+## Project Structure
+```
+research-assistant/
+├── sources_pdf/      # Original research papers
+├── sources_markdown/ # Processed paper summaries
+├── sources_analysis/ # Analysis and synthesis
+├── sources_csv/      # Extracted data tables
+├── sources_png/      # Extracted figures and diagrams
+├── sources_xml/      # Structured data extracts
+├── user_illustrations/ # Visual aids and diagrams
+├── user_vos_diagram/  # Visual object space diagrams
+└── scripts/          # Automation and processing scripts
+```
+
+## Task Management
+### New Task Protocol
+1. Initial Setup:
+   - Review current scratchpad content
+   - Clear old task information if needed
+   - Document task requirements
+   - Plan execution steps
+
+2. Task Documentation:
+   ```markdown
+   ## Active Task
+   Description: [Task description]
+   Goal: [Clear objective]
+   Started: [Timestamp]
+   Status: [In Progress/Completed]
+
+   ## Execution Plan
+   [ ] Step 1: [Description]
+   [ ] Step 2: [Description]
+   [X] Completed: [Step description]
+
+   ## Progress Log
+   - [Timestamp] Started task
+   - [Timestamp] Milestone: [Description]
+   - [Timestamp] Challenge: [Description]
+   - [Timestamp] Resolution: [Description]
+   ```
+
+### Research Notes
+1. Paper Processing:
+   ```markdown
+   ## Paper Reference [ID]
+   Source: [sources_pdf/filename.pdf]
+   Title: [Paper Title]
+   Key Quote: "Direct quote for citation" [page]
+
+   ### Important Findings
+   - Finding 1 with page reference [p.X]
+   - Finding 2 with page reference [p.Y]
+
+   ### Citation-Worthy Points
+   1. [Topic Area]:
+      - Fact/statistic for citation [p.Z]
+      - Supporting evidence [p.W]
+
+   ### Cross-References
+   - Links to paper [ID2] on [topic]
+   - Contradicts paper [ID3] regarding [point]
+   ```
+
+2. Topic Summaries:
+   ```markdown
+   ## [Research Topic]
+   ### Key Papers
+   1. [Paper ID1] - Main finding
+   2. [Paper ID2] - Supporting evidence
+
+   ### Consolidated Findings
+   - Finding 1 [ID1, ID2]
+   - Finding 2 [ID3]
+
+   ### Open Questions
+   - Question 1 (partially addressed by [ID1])
+   - Question 2 (not addressed in current papers)
+   ```
+
+## Tools and Automation
+### Available Tools
+1. Document Processing:
+   - PDF text extraction
+   - Markdown conversion
+   - Figure/table extraction
+   - Citation parsing
+
+2. LLM Integration:
+   - Query formatting
+   - Response processing
+   - Context management
+
+3. Web Research:
+   - Web scraping capabilities
+   - Search engine integration
+   - Citation verification
+   - DOI resolution
+
+### Quality Control Framework
+1. Automated Validation:
+   ```markdown
+   ## Content Checks
+   - [ ] Source credibility verified
+   - [ ] Citation format validated
+   - [ ] Reference completeness checked
+   - [ ] Figure numbering verified
+   - [ ] Writing style analyzed
+
+   ## Technical Checks
+   - [ ] PDF extraction complete
+   - [ ] Images properly processed
+   - [ ] Tables correctly formatted
+   - [ ] Links validated
+   ```
+
+2. Manual Review Points:
+   - Methodology assessment
+   - Results interpretation
+   - Bias identification
+   - Limitation documentation
+
+## Academic Standards
+### Writing Guidelines
+1. Document Structure:
+   - H1-H5 hierarchy
+   - Standard sections
+   - Clear paragraphs
+   - Consistent terminology
+
+2. Content Format:
+   - Maximum 20% bullet points per section
+   - Minimum 80% narrative paragraphs
+   - Dense citation integration (2-3 citations per paragraph)
+   - Bullet points only for:
+     * Lists of distinct features/characteristics
+     * Step-by-step procedures
+     * Key points summaries
+     * Design considerations
+
+3. Citations (IEEE):
+   ```markdown
+   In-text: [1], [2], [1], [3]
+   Multiple: [1], [2], [3]
+   Range: [1]-[4]
+   ```
+
+4. Paragraph Structure:
+   - Topic sentence introducing main idea
+   - Supporting evidence with citations
+   - Analysis and synthesis of cited works
+   - Transition to next paragraph/topic
+
+## Visual Elements:
+   ```markdown
+   <div style="width: 500px; margin: 0 auto;">
+   <img src="path/to/image.png" alt=""/>
+   </div>
+   ##### *Figure N: Description*
+   ```
+
+## Version Control
+1. Commit Standards:
+   - Prefix: "[Research]"
+   - Include paper references
+   - Document decisions
+   - Track changes
+
+2. Collaboration:
+   - Branch management
+   - PR templates
+   - Review guidelines
+
+## Continuous Learning
+### Knowledge Base
+1. Technical Lessons:
+   - Tool usage patterns
+   - Error solutions
+   - Performance tips
+   - Version compatibility
+
+2. Process Improvements:
+   - Workflow optimizations
+   - Communication strategies
+   - Quality enhancements
+   - Time-saving techniques
+
+### Active Development
+1. Enhancement Tracking:
+   - Feature requests
+   - Bug reports
+   - Performance issues
+   - User feedback
+
+2. Implementation Notes:
+   - Solution approaches
+   - Code snippets
+   - Configuration tips
+   - Troubleshooting guides
+
+## Literature Review Task Tracking
+
+### Active Task
+Description: Complete systematic literature review draft
+Goal: Create comprehensive review of sensor fusion in robotics
+Started: [Current Timestamp]
+Status: In Progress
+
+### Document Sections Progress
+[x] Abstract
+    [x] Brief overview of the field
+    [x] Key findings from review
+    [x] Research implications
+    [x] 150-250 words
+
+[ ] Keywords
+    [x] Initial keywords added
+    [ ] Review and refine based on analysis
+    [ ] Add user-centered design related keywords
+
+[x] 1. Introduction
+    [x] 1.1 Background and Motivation
+        [x] Historical context
+        [x] Current challenges
+        [x] Industry relevance
+    [x] 1.2 Research Objectives
+        [x] Review goals
+        [x] Research questions
+        [x] Integration aspects
+        [x] User-centered design focus
+        [x] Rapid prototyping elements
+    [x] 1.3 Scope and Limitations
+        [x] Time period covered
+        [x] Types of systems included
+        [x] Integration scope
+    [x] 1.4 Review Methodology
+        [x] Search strategy
+        [x] Selection criteria
+        [x] Analysis approach
+
+[ ] 2. Theoretical Foundation
+    [x] 2.1 Fundamentals of Sensor Fusion
+        [x] Basic principles
+        [x] Integration challenges
+        [x] User-centered considerations
+    [x] 2.2 Types of Sensor Modalities
+        [x] Sensor characteristics
+        [x] Complementary aspects
+        [x] Integration requirements
+    [x] 2.3 Fusion Architectures and Frameworks
+        [x] Traditional architectures
+        [x] Modern approaches
+        [x] Rapid prototyping considerations
+
+[x] 3. Traditional Approaches
+    [x] 3.1 Kalman Filter-based Methods
+    [x] 3.2 Probabilistic Approaches
+    [x] 3.3 Geometric Methods
+
+[x] 4. Deep Learning-Based Fusion
+    [x] 4.1 Neural Network Architectures
+    [x] 4.2 End-to-End Learning
+    [x] 4.3 Hybrid Methods
+
+[x] 5. Applications and Use Cases
+    [x] 5.1 SLAM
+    [x] 5.2 Object Detection/Tracking
+    [x] 5.3 Navigation
+    [x] 5.4 Environmental Perception
+
+[ ] 6. Performance Analysis
+    [ ] 6.1 Evaluation Metrics
+    [ ] 6.2 Comparative Studies
+    [ ] 6.3 Benchmark Datasets
+
+[ ] 7. Challenges and Future
+    [ ] 7.1 Technical Challenges
+    [ ] 7.2 Open Problems
+    [ ] 7.3 Future Opportunities
+
+[ ] 8. Conclusion
+    [ ] 8.1 Summary
+    [ ] 8.2 Implications
+    [ ] 8.3 Future Work
+
+[x] References
+    [x] All 15 papers added
+    [x] IEEE format
+    [x] Chronological order
+
+### Quality Checks
+[ ] Citation completeness
+[ ] Figure numbering
+[ ] Table formatting
+[ ] Writing style consistency
+[ ] Technical accuracy
+[ ] Cross-reference validity
+
+### Next Actions
+1. Draft Abstract
+2. Complete Introduction sections
+3. Build theoretical foundation
+4. Document traditional approaches
+5. Analyze deep learning methods
+6. Compile applications
+7. Assess performance metrics
+8. Discuss future directions
+9. Summarize in conclusion
+
+[End of Task Tracking]
+
+[End of Guidelines]
