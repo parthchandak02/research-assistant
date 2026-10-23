@@ -1,66 +1,92 @@
-# Healthcare Education Technology Research Assistant
+<div align="center">
 
-A systematic review project analyzing User-Centered Design (UCD) and Rapid Prototyping (RP) in healthcare educational technologies for youth.
+<h1>research-assistant</h1>
 
-## Project Overview
-This research assistant helps manage and format systematic review documentation, ensuring consistent academic writing standards and proper citation management.
+<p><b>A folder of PDFs, turned into review material.</b></p>
 
-## Project Structure
-1. Source PDFs stored in `sources_pdf/`
-2. Markdown conversions in `sources_markdown/`
-3. PNG extractions in `sources_png/`
-4. Draft documents in root directory
-5. Scripts for file processing in `scripts/`
+<p><i>Drop papers into one folder, and each comes out renamed, summarised by Gemini, and split into text and page images ready for a literature review.</i></p>
 
-## Setup & Installation
+<h6>
 
-### Prerequisites
-- Pandoc (for document conversion)
-- Python 3.8+
-- Git
+![Python](https://img.shields.io/badge/Python-3.8%2B-111111?style=flat-square&logo=python&logoColor=white)
+![Gemini](https://img.shields.io/badge/API-Google%20Gemini-4285F4?style=flat-square&logo=googlegemini&logoColor=white)
+![PyMuPDF](https://img.shields.io/badge/PyMuPDF-pandoc-4285F4?style=flat-square)
+![Status](https://img.shields.io/badge/status-experiment%2C%20inactive%20since%202025-555555?style=flat-square)
 
-### Installation
-1. Install Pandoc:
-   ```bash
-   # macOS
-   brew install pandoc
+</h6>
 
-   # Ubuntu/Debian
-   sudo apt-get install pandoc
-   ```
+<a href="#how-it-works"><b>How it works</b></a> ·
+<a href="#run-it"><b>Run it</b></a> ·
+<a href="#scripts"><b>Scripts</b></a>
 
-2. Clone the repository:
-   ```bash
-   git clone [repository-url]
-   cd research-assistant
-   ```
+<br><br>
 
-3. Install Python dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+<img src="docs/assets/readme/cli.png" width="720" alt="Terminal output of python main.py: five PDFs found, two skipped as already done, one analysed and converted, then a status table showing four of five files complete and one missing its analysis">
 
-## Usage
+<sub>Sample output in the script's real format, with made-up paper filenames. Not a live run.</sub>
 
-### Document Conversion
-Convert markdown drafts to Word format:
+</div>
+
+<br>
+
+A small personal workspace from early 2025, built while writing a systematic review on
+user-centred design and rapid prototyping in health education technology for young people.
+It handles the mechanical part of the reading pile. It is an experiment and no longer
+maintained; [literature-review-assistant](https://github.com/parthchandak02/literature-review-assistant)
+is a later, much fuller take on the same job.
+
+## How it works
+
+`main.py` walks every PDF in `sources_pdf/` and, for each one that is missing an output:
+
+1. **Analyse.** Uploads the PDF to Gemini (`gemini-2.0-flash-exp` by default) and asks for
+   title, authors, year, abstract, findings, methodology, results, limitations, research gap
+   and themes. The answer is saved as `sources_analysis/<name>_analysis.xml`.
+2. **Rename.** Renames the PDF to `firstauthor_short_title_year.pdf` from that analysis.
+3. **Convert.** Writes the text of each page to `sources_markdown/<name>.md` and renders
+   every page to `sources_png/<name>/` with PyMuPDF.
+4. **Report.** Prints a per-file checklist of what exists and what still needs attention.
+
+Files that are already complete are skipped, so it is safe to re-run. It waits 15 seconds
+between files and 5 minutes after a quota error, with three retries per step.
+
+## Run it
+
+Requires Python 3.8+, a [Gemini API key](https://ai.google.dev) and, for Word export, Pandoc.
+
 ```bash
-./scripts/convert_to_docx.sh
+git clone https://github.com/parthchandak02/research-assistant.git
+cd research-assistant
+pip install -r requirements.txt
+cp example.env .env                  # set GEMINI_API_KEY
+python main.py                       # process everything in sources_pdf/
+python main.py --list                # list the PDFs it can see
+python main.py --file paper.pdf      # process one file
 ```
 
-### File Processing
-Process new source PDFs:
+Write the review in `draft.md` (start from [`template_draft.md`](template_draft.md)), then
+build a Word file with narrow margins and academic table styles:
+
 ```bash
-./scripts/process_pdfs.sh
+./scripts/convert_to_docx.sh         # draft.md -> draft.docx via pandoc + python-docx
 ```
 
-## Documentation
-- For detailed formatting guidelines and markdown standards, refer to `.cursorrules`
-- Script documentation available in `scripts/README.md`
-- Example templates in `templates/`
+## Scripts
 
-## Contributing
-Please ensure all contributions follow the formatting guidelines in `.cursorrules` and maintain consistent academic writing standards.
+| | |
+|---|---|
+| `main.py` | Runs analyse, rename, Markdown and PNG for every PDF, then prints the status report |
+| `scripts/pdf_analyze.py` | Gemini file upload, structured analysis to XML, IEEE-style rename |
+| `scripts/pdf_to_markdown.py` | Page-by-page text extraction to Markdown (PyMuPDF) |
+| `scripts/pdf_to_png.py` | One PNG per page (PyMuPDF) |
+| `scripts/convert_to_docx.py`, `.sh` | Markdown to DOCX through Pandoc with a generated reference style |
+| `user_vos_diagram/` | Notes on VOSviewer for bibliometric maps |
 
-## License
-[Add appropriate license information]
+Writing conventions for the draft (headings, tables, citations) live in
+[`.cursorrules`](.cursorrules), which doubles as the AI editor's rules file.
+
+<br>
+
+<div align="center">
+<sub>Built with Google Gemini, PyMuPDF, Pandoc and python-docx.</sub>
+</div>
