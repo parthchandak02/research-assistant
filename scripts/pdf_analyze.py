@@ -2,7 +2,8 @@
 
 import logging
 from pathlib import Path
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import time
 import os
 from dotenv import load_dotenv
@@ -50,16 +51,18 @@ class PDFAnalyzer:
         self.source_dir = Path('sources_pdf')
         self.analysis_dir = Path('sources_analysis')
 
-        # Configure Gemini
+        # Configure Gemini (10 minute timeout for long PDFs)
         self.api_key = api_key
-        genai.configure(api_key=self.api_key)
+        self.client = genai.Client(
+            api_key=self.api_key,
+            http_options=types.HttpOptions(timeout=600_000),
+        )
 
         # Get model name from environment
         self.model_name = os.getenv('GEMINI_MODEL_NAME', 'gemini-3.8-flash')
 
-        # Initialize model with system instructions
-        self.model = genai.GenerativeModel(
-            model_name=self.model_name,
+        # System instructions sent with every request
+        self.generation_config = types.GenerateContentConfig(
             system_instruction=[
                 "You are an expert research assistant analyzing academic papers.",
                 "Extract the following information:",
@@ -215,29 +218,35 @@ class PDFAnalyzer:
 
             # Upload file to Gemini
             try:
-                pdf_file = genai.get_file(f"files/{file_name}")
+                pdf_file = self.client.files.get(name=f"files/{file_name}")
                 logger.info(f"File already exists: {pdf_file.uri}")
-            except:
+            except Exception:
                 logger.info(f"Uploading file...")
-                pdf_file = genai.upload_file(path=str(pdf_path), name=file_name, resumable=True)
+                pdf_file = self.client.files.upload(
+                    file=str(pdf_path),
+                    config=types.UploadFileConfig(name=file_name, mime_type="application/pdf"),
+                )
                 logger.info(f"Completed upload: {pdf_file.uri}")
 
             # Wait for processing
-            while pdf_file.state.name == "PROCESSING":
+            while pdf_file.state == types.FileState.PROCESSING:
                 logger.info("Processing...")
                 time.sleep(10)
-                pdf_file = genai.get_file(pdf_file.name)
+                pdf_file = self.client.files.get(name=pdf_file.name)
 
-            if pdf_file.state.name == "FAILED":
-                raise ValueError(f"File processing failed: {pdf_file.state.name}")
+            if pdf_file.state == types.FileState.FAILED:
+                raise ValueError(f"File processing failed: {pdf_file.state}")
 
             # Generate analysis
             logger.info("Generating analysis...")
-            response = self.model.generate_content(
-                [pdf_file, "Please analyze this academic paper and extract the requested information. "
-                 "Use clear, descriptive text. " + ANALYSIS_FORMAT],
-                request_options={"timeout": 600}
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=[pdf_file, "Please analyze this academic paper and extract the requested information. "
+                          "Use clear, descriptive text. " + ANALYSIS_FORMAT],
+                config=self.generation_config,
             )
+            if not response.text:
+                raise ValueError("Gemini returned an empty response")
 
             # Clean and format XML response
             analysis_result = self.clean_xml_response(response.text)

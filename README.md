@@ -52,7 +52,7 @@ between files and 5 minutes after a quota error, with three retries per step.
 
 ## Run it
 
-Requires Python 3.8+, a [Gemini API key](https://ai.google.dev) and, for Word export, Pandoc.
+Requires Python 3.9+, a [Gemini API key](https://ai.google.dev) and, for Word export, Pandoc.
 
 ```bash
 git clone https://github.com/parthchandak02/research-assistant.git
