@@ -2,6 +2,10 @@
 
 # Script to convert draft.md to draft.docx using Pandoc
 # Ensures proper academic formatting and table handling
+#
+# Usage: ./scripts/convert_to_docx.sh [input.md]
+#   With no argument it converts draft.md in the repo root. Start that file
+#   from the template first: cp template_draft.md draft.md
 
 # Check if pandoc is installed
 if ! command -v pandoc &> /dev/null; then
@@ -13,14 +17,17 @@ fi
 # Set paths
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
-INPUT_FILE="$ROOT_DIR/draft.md"
-OUTPUT_FILE="$ROOT_DIR/draft.docx"
+INPUT_FILE="${1:-$ROOT_DIR/draft.md}"
+OUTPUT_FILE="${INPUT_FILE%.*}.docx"
 REFERENCE_FILE="$ROOT_DIR/reference.docx"
 TMP_FILE="$ROOT_DIR/tmp_draft.md"
 
 # Check if input file exists
 if [ ! -f "$INPUT_FILE" ]; then
-    echo "Error: draft.md not found in $ROOT_DIR"
+    echo "Error: $INPUT_FILE not found."
+    echo "Nothing in this repo writes the draft for you. Start one from the template:"
+    echo "    cp \"$ROOT_DIR/template_draft.md\" \"$ROOT_DIR/draft.md\""
+    echo "or pass a Markdown file: $0 path/to/review.md"
     exit 1
 fi
 
@@ -111,8 +118,14 @@ cp "$INPUT_FILE" "$TMP_FILE"
 sed -i '' 's/^•/*/g' "$TMP_FILE"  # Convert bullet points to asterisks
 sed -i '' 's/^  -/  */g' "$TMP_FILE"  # Convert sub-bullet dashes to asterisks
 
+# Optional Lua filter for bullet spacing (only used if present)
+FILTER_ARGS=()
+if [ -f "$SCRIPT_DIR/filters/bullet_spacing.lua" ]; then
+    FILTER_ARGS=(--lua-filter="$SCRIPT_DIR/filters/bullet_spacing.lua")
+fi
+
 # Convert markdown to docx
-echo "Converting draft.md to draft.docx..."
+echo "Converting $INPUT_FILE to $OUTPUT_FILE..."
 
 pandoc "$TMP_FILE" \
     -f markdown+raw_html+raw_tex+raw_attribute+pipe_tables+grid_tables+multiline_tables+simple_tables \
@@ -123,8 +136,8 @@ pandoc "$TMP_FILE" \
     --resource-path=".:$ROOT_DIR:$ROOT_DIR/sources_png:$ROOT_DIR/user_illustrations" \
     --dpi=300 \
     --verbose \
-    --lua-filter="$SCRIPT_DIR/filters/bullet_spacing.lua" \
-    -o "$OUTPUT_FILE"
+    "${FILTER_ARGS[@]}" \
+    -o "$OUTPUT_FILE" || { echo "Error: pandoc conversion failed"; rm -f "$TMP_FILE"; exit 1; }
 
 # Remove temporary file
 rm "$TMP_FILE"

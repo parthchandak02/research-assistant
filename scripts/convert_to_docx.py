@@ -384,6 +384,11 @@ def main():
     if args.verbose:
         logger.setLevel(logging.DEBUG)
     
+    if not Path(args.input_file).is_file():
+        logger.error(f"Input file not found: {args.input_file}")
+        logger.error("Start a draft from the template first: cp template_draft.md draft.md")
+        sys.exit(1)
+
     logger.info("Starting document conversion")
     logger.info(f"Input: {args.input_file}")
     logger.info(f"Output: {args.output_file}")

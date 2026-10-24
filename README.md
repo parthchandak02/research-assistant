@@ -39,7 +39,7 @@ is a later, much fuller take on the same job.
 
 `main.py` walks every PDF in `sources_pdf/` and, for each one that is missing an output:
 
-1. **Analyse.** Uploads the PDF to Gemini (`gemini-2.0-flash-exp` by default) and asks for
+1. **Analyse.** Uploads the PDF to Gemini (`gemini-3.8-flash` by default, override with `GEMINI_MODEL_NAME`) and asks for
    title, authors, year, abstract, findings, methodology, results, limitations, research gap
    and themes. The answer is saved as `sources_analysis/<name>_analysis.xml`.
 2. **Rename.** Renames the PDF to `firstauthor_short_title_year.pdf` from that analysis.
@@ -64,11 +64,13 @@ python main.py --list                # list the PDFs it can see
 python main.py --file paper.pdf      # process one file
 ```
 
-Write the review in `draft.md` (start from [`template_draft.md`](template_draft.md)), then
-build a Word file with narrow margins and academic table styles:
+Nothing writes the review for you. Start `draft.md` from [`template_draft.md`](template_draft.md),
+write it, then build a Word file with narrow margins and academic table styles:
 
 ```bash
+cp template_draft.md draft.md
 ./scripts/convert_to_docx.sh         # draft.md -> draft.docx via pandoc + python-docx
+./scripts/convert_to_docx.sh my.md   # or any other Markdown file -> my.docx
 ```
 
 ## Scripts
@@ -76,7 +78,7 @@ build a Word file with narrow margins and academic table styles:
 | | |
 |---|---|
 | `main.py` | Runs analyse, rename, Markdown and PNG for every PDF, then prints the status report |
-| `scripts/pdf_analyze.py` | Gemini file upload, structured analysis to XML, IEEE-style rename |
+| `scripts/pdf_analyze.py` | Gemini file upload, structured XML analysis (fixed tag list shared by prompt and parser), IEEE-style rename |
 | `scripts/pdf_to_markdown.py` | Page-by-page text extraction to Markdown (PyMuPDF) |
 | `scripts/pdf_to_png.py` | One PNG per page (PyMuPDF) |
 | `scripts/convert_to_docx.py`, `.sh` | Markdown to DOCX through Pandoc with a generated reference style |

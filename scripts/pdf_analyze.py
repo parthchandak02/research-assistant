@@ -6,7 +6,6 @@ import google.generativeai as genai
 import time
 import os
 from dotenv import load_dotenv
-import json
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from typing import Dict, Optional, Tuple
@@ -21,6 +20,28 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# XML elements the model is asked for, in order. The parser below reads these exact tags.
+ANALYSIS_FIELDS = [
+    ("title", "Title"),
+    ("authors", "Authors (in format: 'Last1, First1; Last2, First2')"),
+    ("publication_year", "Publication year (four digits)"),
+    ("abstract", "Abstract"),
+    ("key_findings_contributions", "Key findings/contributions"),
+    ("methodology", "Methodology"),
+    ("results", "Results"),
+    ("limitations", "Limitations"),
+    ("research_gap", "Research gap"),
+    ("thematic_analysis", "Thematic analysis"),
+]
+
+ANALYSIS_FORMAT = (
+    "Respond with XML only, no Markdown code fences and no JSON. Use a single root element "
+    "<analysis> containing exactly these child elements, in this order: "
+    + ", ".join(f"<{tag}>" for tag, _ in ANALYSIS_FIELDS)
+    + ". Escape &, < and > inside element text."
+)
+
+
 class PDFAnalyzer:
     """Analyze PDFs using Google's Gemini API and rename based on analysis."""
 
@@ -34,25 +55,16 @@ class PDFAnalyzer:
         genai.configure(api_key=self.api_key)
 
         # Get model name from environment
-        self.model_name = os.getenv('GEMINI_MODEL_NAME', 'gemini-2.0-flash-exp')
+        self.model_name = os.getenv('GEMINI_MODEL_NAME', 'gemini-3.8-flash')
 
         # Initialize model with system instructions
         self.model = genai.GenerativeModel(
             model_name=self.model_name,
             system_instruction=[
                 "You are an expert research assistant analyzing academic papers.",
-                "Extract the following information in XML format:",
-                "1. Title",
-                "2. Authors (in format: 'Last1, First1; Last2, First2')",
-                "3. Publication year",
-                "4. Abstract",
-                "5. Key findings/contributions",
-                "6. Methodology",
-                "7. Results",
-                "8. Limitations",
-                "9. Research gap",
-                "10. Thematic analysis",
-                "Format the response as a valid XML document with these fields as elements."
+                "Extract the following information:",
+                *[f"<{tag}>: {label}" for tag, label in ANALYSIS_FIELDS],
+                ANALYSIS_FORMAT,
             ]
         )
 
@@ -83,55 +95,36 @@ class PDFAnalyzer:
             first_author = authors.split(';')[0].split('and')[0].strip()
             return first_author.split()[-1]
 
-    def create_ieee_filename(self, analysis_text: str, original_name: str) -> str:
-        """Create IEEE-style filename from analysis results."""
+    def create_ieee_filename(self, analysis_xml: str, original_name: str) -> str:
+        """Create an IEEE-style filename (firstauthor_short_title_year.pdf) from the XML analysis."""
         try:
-            # Try to parse the analysis text as JSON
-            try:
-                analysis = json.loads(analysis_text)
-            except json.JSONDecodeError:
-                # If not valid JSON, try to extract information using regex
-                title_match = re.search(r'"Title":\s*"([^"]+)"', analysis_text)
-                authors_match = re.search(r'"Authors":\s*"([^"]+)"', analysis_text)
-                year_match = re.search(r'"Publication year":\s*"?(\d{4})"?', analysis_text)
+            root = ET.fromstring(analysis_xml)
 
-                analysis = {
-                    "Title": title_match.group(1) if title_match else "",
-                    "Authors": authors_match.group(1) if authors_match else "",
-                    "Publication year": year_match.group(1) if year_match else ""
-                }
+            def field(tag: str) -> str:
+                element = root.find(tag)
+                return element.text.strip() if element is not None and element.text else ""
 
-            # Extract components
-            title = analysis.get("Title", "")
-            authors = analysis.get("Authors", "")
-            year = analysis.get("Publication year", "")
+            title = field('title')
+            authors = field('authors')
+            year_match = re.search(r'\d{4}', field('publication_year'))
+            year = year_match.group(0) if year_match else ""
 
-            # Clean up year
-            year = re.search(r'\d{4}', str(year)).group(0) if re.search(r'\d{4}', str(year)) else ""
-
-            # Get first author's last name
-            first_author = self.extract_first_author_lastname(authors) if authors else ""
-
-            # Get shortened title (first 3-4 significant words)
-            title_words = [w for w in re.findall(r'\w+', title.lower())
-                         if len(w) > 3 and w not in {'with', 'using', 'from', 'through', 'based'}]
-            short_title = '_'.join(title_words[:3])
-
-            # Combine components
             components = []
-            if first_author:
-                components.append(self.sanitize_filename(first_author))
-            if short_title:
-                components.append(self.sanitize_filename(short_title))
+            if authors:
+                first_author = self.extract_first_author_lastname(authors)
+                if first_author:
+                    components.append(self.sanitize_filename(first_author))
+            if title:
+                title_words = [w for w in re.findall(r'\w+', title.lower())
+                               if len(w) > 3 and w not in {'with', 'using', 'from', 'through', 'based'}]
+                if title_words:
+                    components.append(self.sanitize_filename('_'.join(title_words[:3])))
             if year:
                 components.append(year)
 
-            # If we couldn't extract meaningful components, use original name
             if not components:
                 return original_name
-
-            new_name = '_'.join(components) + '.pdf'
-            return new_name
+            return '_'.join(components) + '.pdf'
 
         except Exception as e:
             logger.error(f"Error creating filename from analysis: {e}")
@@ -164,136 +157,6 @@ class PDFAnalyzer:
 
         return result
 
-    def clean_json_response(self, text: str) -> str:
-        """Clean and extract valid JSON from Gemini's response."""
-        try:
-            # First try to find a complete JSON object with balanced braces
-            def find_json_object(text):
-                stack = []
-                start = -1
-                for i, char in enumerate(text):
-                    if char == '{':
-                        if not stack:
-                            start = i
-                        stack.append(char)
-                    elif char == '}':
-                        if stack:
-                            stack.pop()
-                            if not stack and start != -1:
-                                return text[start:i+1]
-                return None
-
-            json_str = find_json_object(text)
-            if not json_str:
-                raise ValueError("No valid JSON object found")
-
-            # Clean up the JSON string
-            json_str = re.sub(r'\\n\s+', ' ', json_str)  # Replace newlines with spaces
-            json_str = re.sub(r'\s+', ' ', json_str)  # Normalize whitespace
-            json_str = json_str.replace('\\"', '"')  # Fix escaped quotes
-            json_str = re.sub(r'(?<!\\)"([^"]*?)\\(?!["\\])', r'"\1', json_str)  # Fix invalid escapes
-
-            # Try to parse it
-            try:
-                return json.dumps(json.loads(json_str), ensure_ascii=False)
-            except:
-                # If that fails, try more aggressive cleaning
-                json_str = re.sub(r'\\(?!["\\/bfnrt])', '', json_str)  # Remove invalid escapes
-                return json.dumps(json.loads(json_str), ensure_ascii=False)
-
-        except Exception as e:
-            logger.error(f"Error cleaning JSON response: {e}")
-            # If cleaning fails, try to create a structured JSON from the text
-            try:
-                # Extract information using regex patterns with more flexible matching
-                patterns = {
-                    "Title": r'Title["\']?\s*:?\s*["\']?([^"}{\n]+)["\']?',
-                    "Authors": r'Authors["\']?\s*:?\s*["\']?([^"}{\n]+)["\']?',
-                    "Publication year": r'Publication year["\']?\s*:?\s*["\']?(\d{4})["\']?',
-                    "Abstract": r'Abstract["\']?\s*:?\s*["\']?([^"}{\n]+)["\']?',
-                    "Key findings/contributions": r'Key findings[^:]*:?\s*["\']?([^"}{\n]+)["\']?',
-                    "Methodology": r'Methodology["\']?\s*:?\s*["\']?([^"}{\n]+)["\']?'
-                }
-
-                result = {}
-                for key, pattern in patterns.items():
-                    matches = re.finditer(pattern, text, re.IGNORECASE | re.DOTALL)
-                    for match in matches:
-                        value = match.group(1).strip()
-                        value = re.sub(r'\s+', ' ', value)  # Normalize whitespace
-                        if value and (key not in result or len(value) > len(result[key])):
-                            result[key] = value
-
-                # If we found any data, return it
-                if any(result.values()):
-                    return json.dumps(result, ensure_ascii=False)
-
-                # If no data found, raise exception to trigger error XML
-                raise ValueError("No data could be extracted from response")
-
-            except Exception as e2:
-                logger.error(f"Error extracting structured data: {e2}")
-                return json.dumps({
-                    "error": str(e2),
-                    "raw_text": text[:1000]  # Limit raw text to first 1000 chars
-                })
-
-    def clean_text_content(self, text: str) -> str:
-        """Clean text content for XML by removing unwanted escape sequences."""
-        if not text:
-            return ""
-
-        # Convert escaped quotes back to regular quotes
-        text = text.replace('\\"', '"')
-        text = text.replace('&quot;', '"')
-
-        # Remove any remaining escape sequences except for newlines
-        text = text.replace('\\n', '\n')  # Preserve newlines
-        text = re.sub(r'\\[^n]', '', text)  # Remove other escape sequences
-
-        # Clean up any HTML/XML entities
-        text = text.replace('&amp;', '&')
-        text = text.replace('&lt;', '<')
-        text = text.replace('&gt;', '>')
-
-        return text.strip()
-
-    def json_to_xml(self, json_str: str) -> str:
-        """Convert JSON analysis to pretty XML format."""
-        try:
-            # Clean and parse JSON
-            cleaned_json = self.clean_json_response(json_str)
-            data = json.loads(cleaned_json)
-
-            # Create XML structure
-            root = ET.Element("analysis")
-
-            # Add each field
-            for key, value in data.items():
-                element = ET.SubElement(root, key.lower().replace(' ', '_').replace('/', '_'))
-                # Clean and handle multiline text
-                if isinstance(value, str):
-                    element.text = self.clean_text_content(value)
-                else:
-                    element.text = str(value)
-
-            # Convert to string and pretty print with proper encoding
-            rough_string = ET.tostring(root, encoding='unicode', method='xml')
-            parsed = minidom.parseString(rough_string)
-            # Remove extra blank lines while preserving intended whitespace
-            xml_str = '\n'.join(line for line in parsed.toprettyxml(indent='  ').split('\n') if line.strip())
-            return xml_str
-
-        except Exception as e:
-            logger.error(f"Error converting to XML: {e}")
-            # Create error XML
-            root = ET.Element("analysis")
-            error = ET.SubElement(root, "error")
-            error.text = str(e)
-            raw = ET.SubElement(root, "raw_text")
-            raw.text = self.clean_text_content(json_str)
-            return minidom.parseString(ET.tostring(root, encoding='unicode')).toprettyxml(indent="  ")
-
     def clean_xml_response(self, text: str) -> str:
         """Clean and extract valid XML from Gemini's response."""
         try:
@@ -303,22 +166,14 @@ class PDFAnalyzer:
                 return xml_match.group(1)
 
             # If no XML declaration, try to find just the analysis tags
-            xml_match = re.search(r'(<analysis>.*?</analysis>)', text, re.DOTALL)
+            xml_match = re.search(r'(<analysis>.*?</analysis>)', text, re.DOTALL | re.IGNORECASE)
             if xml_match:
                 return f'<?xml version="1.0" encoding="UTF-8"?>\n{xml_match.group(1)}'
 
             # If still no match, try to extract structured data
             patterns = {
-                "title": r'<title>(.*?)</title>',
-                "authors": r'<authors>(.*?)</authors>',
-                "publication_year": r'<publication[_-]year>(\d{4})</publication[_-]year>',
-                "abstract": r'<abstract>(.*?)</abstract>',
-                "key_findings_contributions": r'<key[_-]findings[_-]contributions>(.*?)</key[_-]findings[_-]contributions>',
-                "methodology": r'<methodology>(.*?)</methodology>',
-                "results": r'<results>(.*?)</results>',
-                "limitations": r'<limitations>(.*?)</limitations>',
-                "research_gap": r'<research[_-]gap>(.*?)</research[_-]gap>',
-                "thematic_analysis": r'<thematic[_-]analysis>(.*?)</thematic[_-]analysis>'
+                tag: rf'<{tag.replace("_", "[_-]")}>(.*?)</{tag.replace("_", "[_-]")}>'
+                for tag, _ in ANALYSIS_FIELDS
             }
 
             # Build XML structure from found elements
@@ -379,10 +234,8 @@ class PDFAnalyzer:
             # Generate analysis
             logger.info("Generating analysis...")
             response = self.model.generate_content(
-                [pdf_file, """Please analyze this academic paper and extract the requested information in XML format.
-                Format your response as a valid XML document with root element <analysis> containing the specified fields as child elements.
-                Use clear, descriptive text and preserve any important formatting or structure in the content.
-                Ensure all XML tags are properly closed and nested."""],
+                [pdf_file, "Please analyze this academic paper and extract the requested information. "
+                 "Use clear, descriptive text. " + ANALYSIS_FORMAT],
                 request_options={"timeout": 600}
             )
 
@@ -398,35 +251,10 @@ class PDFAnalyzer:
             except Exception as e:
                 logger.error(f"Error pretty printing XML: {e}")
 
-            # Extract title and authors for filename from XML
-            try:
-                root = ET.fromstring(analysis_result)
-                title = root.find('title').text if root.find('title') is not None else ""
-                authors = root.find('authors').text if root.find('authors') is not None else ""
-                year = root.find('publication_year').text if root.find('publication_year') is not None else ""
+            # Build the new filename from the XML fields
+            new_name = self.create_ieee_filename(analysis_result, pdf_path.name)
 
-                # Generate filename components
-                components = []
-                if authors:
-                    first_author = self.extract_first_author_lastname(authors)
-                    if first_author:
-                        components.append(self.sanitize_filename(first_author))
-
-                if title:
-                    title_words = [w for w in re.findall(r'\w+', title.lower())
-                                 if len(w) > 3 and w not in {'with', 'using', 'from', 'through', 'based'}]
-                    if title_words:
-                        components.append('_'.join(title_words[:3]))
-
-                if year and re.match(r'\d{4}', year):
-                    components.append(year)
-
-                new_name = '_'.join(components) + '.pdf' if components else pdf_path.name
-            except Exception as e:
-                logger.error(f"Error extracting filename components from XML: {e}")
-                new_name = pdf_path.name
-
-            # Generate new filename based on JSON response
+            # Generate new filename based on the XML analysis
             new_path = pdf_path.parent / new_name
 
             # Ensure we don't overwrite existing files
