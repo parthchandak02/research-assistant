@@ -1,5 +1,5 @@
 PyMuPDF==1.25.2
-python-dotenv==1.0.1
+python-dotenv==1.2.2
 logfire==3.4.0
 importlib-metadata>=6.0  # logfire 3.4 imports it but does not declare it
 python-docx==1.1.0
